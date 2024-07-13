@@ -13,7 +13,7 @@ import { Box, IconButton } from "@radix-ui/themes";
 
 function Sidebar() {
   return (
-    <Box className="w-16 h-full bg-slate-200 !flex flex-col items-center gap-3 pt-3">
+    <Box className="w-16 h-full bg-slate-200 flex-col items-center gap-3 pt-3 !hidden sm:!flex">
       <IconButton
         size="3"
         className="!bg-transparent !text-gray-600 !cursor-pointer"

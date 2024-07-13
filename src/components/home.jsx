@@ -16,6 +16,7 @@ import {
 } from "@radix-ui/themes";
 import {
   BookmarkIcon,
+  CaretSortIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   Cross1Icon,
@@ -40,7 +41,7 @@ function Home() {
 
   return (
     <Container size="4" className="py-6">
-      <Card className="!px-0">
+      <Card className="!px-0 !mx-2">
         <Flex className="mt-4 !justify-between items-center px-4">
           <Text className="text-lg font-medium">Users</Text>
           <Flex className="gap-4">
@@ -58,27 +59,29 @@ function Home() {
               <Dialog.Content maxWidth="1024px">
                 <Dialog.Title>Add User</Dialog.Title>
 
-                <Flex gap="3">
-                  <Box className="w-8/12">
+                <Flex gap="3" className="sm:flex-row flex-col">
+                  <Box className="sm:w-8/12 w-full">
                     <Flex gap="3" className="mt-4">
-                      <Box className="w-6/12">
+                      <Box className="w-8/12">
                         <label>
                           <Text as="span" size="2" mb="1" weight="bold">
                             Email <Text className="text-red-600">*</Text>
                           </Text>
                           <TextField.Root
+                            size="3"
                             defaultValue=""
                             placeholder="Enter your email"
                           />
                         </label>
                       </Box>
-                      <Box className="w-6/12">
+                      <Box className="w-4/12">
                         <Text as="span" size="2" mb="1" weight="bold">
                           Role
                         </Text>
                         <DropdownMenu.Root>
                           <DropdownMenu.Trigger>
                             <Button
+                              size="3"
                               variant="soft"
                               color="gray"
                               className="!w-full !justify-between"
@@ -87,7 +90,11 @@ function Home() {
                               <DropdownMenu.TriggerIcon />
                             </Button>
                           </DropdownMenu.Trigger>
-                          <DropdownMenu.Content variant="soft" color="indigo">
+                          <DropdownMenu.Content
+                            variant="soft"
+                            color="indigo"
+                            size="2"
+                          >
                             <DropdownMenu.Item>Admin</DropdownMenu.Item>
                             <DropdownMenu.Item>User</DropdownMenu.Item>
                             <DropdownMenu.Item>Editor</DropdownMenu.Item>
@@ -101,6 +108,8 @@ function Home() {
                           Phone number <Text className="text-red-600">*</Text>
                         </Text>
                         <TextField.Root
+                          type="number"
+                          size="3"
                           defaultValue=""
                           placeholder="Enter your phone number"
                         />
@@ -113,6 +122,7 @@ function Home() {
                             First Name <Text className="text-red-600">*</Text>
                           </Text>
                           <TextField.Root
+                            size="3"
                             defaultValue=""
                             placeholder="Enter your first name"
                           />
@@ -124,6 +134,7 @@ function Home() {
                             Last Name <Text className="text-red-600">*</Text>
                           </Text>
                           <TextField.Root
+                            size="3"
                             defaultValue=""
                             placeholder="Enter your last name"
                           />
@@ -136,6 +147,7 @@ function Home() {
                           Password <Text className="text-red-600">*</Text>
                         </Text>
                         <TextField.Root
+                          size="3"
                           variant="classic"
                           type="password"
                           defaultValue=""
@@ -149,6 +161,7 @@ function Home() {
                           </TextField.Slot>
                         </TextField.Root>
                         <TextField.Root
+                          size="3"
                           className="mt-4"
                           variant="classic"
                           type="password"
@@ -165,10 +178,13 @@ function Home() {
                       </label>
                     </Box>
                   </Box>
-                  <Separator orientation="vertical" className="!h-auto" />
+                  <Separator
+                    orientation="vertical"
+                    className="!h-auto hidden sm:block"
+                  />
                   <Flex
                     direction="column"
-                    className="w-4/12 items-center"
+                    className="sm:w-4/12 w-full items-center"
                     gap="4"
                   >
                     <Text as="span" size="2" mb="1" weight="bold">
@@ -176,6 +192,7 @@ function Home() {
                     </Text>
                     <Avatar size="8" src={picDefault} fallback="A" />
                     <Button
+                      size="3"
                       color="gray"
                       variant="outline"
                       highContrast
@@ -192,14 +209,14 @@ function Home() {
                   </Flex>
                 </Flex>
 
-                <Flex gap="3" className="my-6" justify="start">
+                <Flex gap="3" className="my-6" justify="end">
                   <Dialog.Close>
-                    <Button variant="soft" color="gray">
+                    <Button variant="soft" color="gray" size="3">
                       Cancel
                     </Button>
                   </Dialog.Close>
                   <Dialog.Close>
-                    <Button color="gray" variant="solid" highContrast>
+                    <Button color="gray" variant="solid" highContrast size="3">
                       Add User
                     </Button>
                   </Dialog.Close>
@@ -210,27 +227,32 @@ function Home() {
         </Flex>
         <Flex gap="4" className="mt-6 px-4">
           <TextField.Root
+            size="3"
             placeholder="Search name, email, phone…"
-            className="w-[240px]"
+            className="sm:!w-[340px] !w-full"
           >
             <TextField.Slot>
-              <MagnifyingGlassIcon height="16" width="16" />
+              <MagnifyingGlassIcon height="24" width="24" />
             </TextField.Slot>
           </TextField.Root>
-          <DropdownMenu.Root>
-            <DropdownMenu.Trigger>
-              <Button variant="soft" color="gray">
-                Roles
-                <DropdownMenu.TriggerIcon />
-              </Button>
-            </DropdownMenu.Trigger>
-            <DropdownMenu.Content>
-              <DropdownMenu.Item>Admin</DropdownMenu.Item>
-              <DropdownMenu.Item>User</DropdownMenu.Item>
-              <DropdownMenu.Item>Editor</DropdownMenu.Item>
-            </DropdownMenu.Content>
-          </DropdownMenu.Root>
+          <Box className="!hidden sm:!block">
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger>
+                <Button variant="soft" color="gray" size="3">
+                  Roles
+                  <DropdownMenu.TriggerIcon />
+                </Button>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Content size="2">
+                <DropdownMenu.Item>Admin</DropdownMenu.Item>
+                <DropdownMenu.Item>User</DropdownMenu.Item>
+                <DropdownMenu.Item>Editor</DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu.Root>
+          </Box>
+
           <Button
+            size="3"
             color="gray"
             variant="solid"
             highContrast
@@ -239,15 +261,51 @@ function Home() {
             Search
           </Button>
         </Flex>
+        <Flex className="sm:!hidden mt-4 px-4">
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger>
+              <Button variant="soft" color="gray" size="3">
+                Roles
+                <DropdownMenu.TriggerIcon />
+              </Button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content size="2">
+              <DropdownMenu.Item>Admin</DropdownMenu.Item>
+              <DropdownMenu.Item>User</DropdownMenu.Item>
+              <DropdownMenu.Item>Editor</DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Root>
+        </Flex>
         <Table.Root className="mt-6">
           <Table.Header>
             <Table.Row>
               <Table.ColumnHeaderCell>Id</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell>Email</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell>Phone Number</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell>Firstname</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell>Lastname</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell>Role</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>
+                <Flex className="items-center">
+                  <Text>Firstname</Text>
+                  <Box className="p-1 hover:bg-slate-100 rounded-sm cursor-pointer">
+                    <CaretSortIcon />
+                  </Box>
+                </Flex>
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>
+                <Flex className="items-center">
+                  <Text>Lastname</Text>
+                  <Box className="p-1 hover:bg-slate-100 rounded-sm cursor-pointer">
+                    <CaretSortIcon />
+                  </Box>
+                </Flex>
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>
+                <Flex className="items-center">
+                  <Text>Role</Text>
+                  <Box className="p-1 hover:bg-slate-100 rounded-sm cursor-pointer">
+                    <CaretSortIcon />
+                  </Box>
+                </Flex>
+              </Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell>Action</Table.ColumnHeaderCell>
             </Table.Row>
           </Table.Header>
@@ -272,27 +330,32 @@ function Home() {
                     <Dialog.Content maxWidth="1024px">
                       <Dialog.Title>Edit User</Dialog.Title>
 
-                      <Flex gap="3">
-                        <Box className="w-8/12">
+                      <Flex
+                        gap="3"
+                        className="flex-col sm:flex-row items-center"
+                      >
+                        <Box className="sm:w-8/12 w-full">
                           <Flex gap="3" className="mt-4">
-                            <Box className="w-6/12">
+                            <Box className="w-8/12">
                               <label>
                                 <Text as="span" size="2" mb="1" weight="bold">
                                   Email <Text className="text-red-600">*</Text>
                                 </Text>
                                 <TextField.Root
+                                  size="3"
                                   defaultValue=""
                                   placeholder="Enter your email"
                                 />
                               </label>
                             </Box>
-                            <Box className="w-6/12">
+                            <Box className="w-4/12">
                               <Text as="span" size="2" mb="1" weight="bold">
                                 Role
                               </Text>
                               <DropdownMenu.Root>
                                 <DropdownMenu.Trigger>
                                   <Button
+                                    size="3"
                                     variant="soft"
                                     color="gray"
                                     className="!w-full !justify-between"
@@ -319,6 +382,8 @@ function Home() {
                                 <Text className="text-red-600">*</Text>
                               </Text>
                               <TextField.Root
+                                size="3"
+                                type="number"
                                 defaultValue=""
                                 placeholder="Enter your phone number"
                               />
@@ -332,6 +397,7 @@ function Home() {
                                   <Text className="text-red-600">*</Text>
                                 </Text>
                                 <TextField.Root
+                                  size="3"
                                   defaultValue=""
                                   placeholder="Enter your first name"
                                 />
@@ -344,6 +410,7 @@ function Home() {
                                   <Text className="text-red-600">*</Text>
                                 </Text>
                                 <TextField.Root
+                                  size="3"
                                   defaultValue=""
                                   placeholder="Enter your last name"
                                 />
@@ -356,6 +423,7 @@ function Home() {
                                 Password <Text className="text-red-600">*</Text>
                               </Text>
                               <TextField.Root
+                                size="3"
                                 variant="classic"
                                 type="password"
                                 defaultValue=""
@@ -369,6 +437,7 @@ function Home() {
                                 </TextField.Slot>
                               </TextField.Root>
                               <TextField.Root
+                                size="3"
                                 className="mt-4"
                                 variant="classic"
                                 type="password"
@@ -385,7 +454,10 @@ function Home() {
                             </label>
                           </Box>
                         </Box>
-                        <Separator orientation="vertical" className="!h-auto" />
+                        <Separator
+                          orientation="vertical"
+                          className="!h-auto sm:block hidden"
+                        />
                         <Flex
                           direction="column"
                           className="w-4/12 items-center"
@@ -396,10 +468,12 @@ function Home() {
                           </Text>
                           <Avatar size="8" src={picDefault} fallback="A" />
                           <Button
+                            size="3"
                             color="gray"
                             variant="outline"
                             highContrast
                             onClick={handleButtonClick}
+                            className="!w-max"
                           >
                             Select Image
                           </Button>
@@ -414,12 +488,17 @@ function Home() {
 
                       <Flex gap="3" className="my-6" justify="start">
                         <Dialog.Close>
-                          <Button variant="soft" color="gray">
+                          <Button variant="soft" color="gray" size="3">
                             Cancel
                           </Button>
                         </Dialog.Close>
                         <Dialog.Close>
-                          <Button color="gray" variant="solid" highContrast>
+                          <Button
+                            color="gray"
+                            variant="solid"
+                            highContrast
+                            size="3"
+                          >
                             Save Edit
                           </Button>
                         </Dialog.Close>
@@ -442,12 +521,12 @@ function Home() {
 
                       <Flex gap="3" mt="4" justify="end">
                         <AlertDialog.Cancel>
-                          <Button variant="soft" color="gray">
+                          <Button variant="soft" color="gray" size="3">
                             Cancel
                           </Button>
                         </AlertDialog.Cancel>
                         <AlertDialog.Action>
-                          <Button variant="solid" color="red">
+                          <Button variant="solid" color="red" size="3">
                             Yes, I agree
                           </Button>
                         </AlertDialog.Action>
@@ -531,24 +610,27 @@ function Home() {
             </Table.Row>
           </Table.Body>
         </Table.Root>
-        <Flex className="my-6 !justify-end px-4">
-          <Flex className="items-center gap-6">
-            <Text>Rows per Page</Text>
-            <DropdownMenu.Root>
-              <DropdownMenu.Trigger>
-                <Button variant="soft" color="gray">
-                  5
-                  <DropdownMenu.TriggerIcon />
-                </Button>
-              </DropdownMenu.Trigger>
-              <DropdownMenu.Content>
-                <DropdownMenu.Item>5</DropdownMenu.Item>
-                <DropdownMenu.Item>10</DropdownMenu.Item>
-                <DropdownMenu.Item>15</DropdownMenu.Item>
-                <DropdownMenu.Item>20</DropdownMenu.Item>
-              </DropdownMenu.Content>
-            </DropdownMenu.Root>
-            <Text>1 - 5 of 25</Text>
+        <Flex className="my-6 sm:!justify-end !justify-center  px-4">
+          <Flex className="items-center gap-6 flex-col sm:flex-row">
+            <Flex className="!justify-between items-center gap-4">
+              <Text>Rows per Page</Text>
+              <DropdownMenu.Root>
+                <DropdownMenu.Trigger>
+                  <Button variant="soft" color="gray">
+                    5
+                    <DropdownMenu.TriggerIcon />
+                  </Button>
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Content>
+                  <DropdownMenu.Item>5</DropdownMenu.Item>
+                  <DropdownMenu.Item>10</DropdownMenu.Item>
+                  <DropdownMenu.Item>15</DropdownMenu.Item>
+                  <DropdownMenu.Item>20</DropdownMenu.Item>
+                </DropdownMenu.Content>
+              </DropdownMenu.Root>
+              <Text>1 - 5 of 25</Text>
+            </Flex>
+
             <Flex gap="3">
               <IconButton color="gray" variant="soft">
                 <DoubleArrowLeftIcon width="18" height="18" />
