@@ -29,10 +29,42 @@ import {
   MagnifyingGlassIcon,
   Pencil2Icon,
 } from "@radix-ui/react-icons";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import picDefault from "../assets/images/picDefault2.jpg";
+import {
+  getAllUser,
+  createUser,
+  updateUser,
+  deleteUser,
+} from "../api/configApi";
 
 function Home() {
+  const [users, setUsers] = useState([]);
+  const [itemStart, setItemStart] = useState(5);
+  const [itemsEnd, setItemEnd] = useState(10);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const getUsers = async () => {
+      try {
+        const data = await getAllUser();
+        setUsers(data);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getUsers();
+  }, []);
+
+  const handleSliceUser = () => {
+    return users.slice(itemStart, itemsEnd);
+  };
+
+  //config upload image
   const fileInputRef = useRef(null);
 
   const handleButtonClick = () => {
@@ -311,303 +343,239 @@ function Home() {
           </Table.Header>
 
           <Table.Body>
-            <Table.Row>
-              <Table.Cell>1</Table.Cell>
-              <Table.Cell>huynhca@example.com</Table.Cell>
-              <Table.Cell>0813436664</Table.Cell>
-              <Table.Cell>Cai Hoang</Table.Cell>
-              <Table.Cell>Huynh</Table.Cell>
-              <Table.Cell>Admin</Table.Cell>
-              <Table.Cell>
-                <Flex gap="4">
-                  <Dialog.Root>
-                    <Dialog.Trigger>
-                      <IconButton color="amber" variant="soft">
-                        <Pencil2Icon width="18" height="18" />
-                      </IconButton>
-                    </Dialog.Trigger>
+            {users.slice(itemStart, itemsEnd).map((user) => (
+              <Table.Row key={user.id}>
+                <Table.Cell>{user.id}</Table.Cell>
+                <Table.Cell>{user.email}</Table.Cell>
+                <Table.Cell>{user.phoneNumber}</Table.Cell>
+                <Table.Cell>{user.firstName}</Table.Cell>
+                <Table.Cell>{user.lastName}</Table.Cell>
+                <Table.Cell>{user.role}</Table.Cell>
+                <Table.Cell>
+                  <Flex gap="4">
+                    <Dialog.Root>
+                      <Dialog.Trigger>
+                        <IconButton color="amber" variant="soft">
+                          <Pencil2Icon width="18" height="18" />
+                        </IconButton>
+                      </Dialog.Trigger>
 
-                    <Dialog.Content maxWidth="1024px">
-                      <Dialog.Title>Edit User</Dialog.Title>
+                      <Dialog.Content maxWidth="1024px">
+                        <Dialog.Title>Edit User</Dialog.Title>
 
-                      <Flex
-                        gap="3"
-                        className="flex-col sm:flex-row items-center"
-                      >
-                        <Box className="sm:w-8/12 w-full">
-                          <Flex gap="3" className="mt-4">
-                            <Box className="w-8/12">
-                              <label>
-                                <Text as="span" size="2" mb="1" weight="bold">
-                                  Email <Text className="text-red-600">*</Text>
-                                </Text>
-                                <TextField.Root
-                                  size="3"
-                                  defaultValue=""
-                                  placeholder="Enter your email"
-                                />
-                              </label>
-                            </Box>
-                            <Box className="w-4/12">
-                              <Text as="span" size="2" mb="1" weight="bold">
-                                Role
-                              </Text>
-                              <DropdownMenu.Root>
-                                <DropdownMenu.Trigger>
-                                  <Button
-                                    size="3"
-                                    variant="soft"
-                                    color="gray"
-                                    className="!w-full !justify-between"
-                                  >
-                                    Select
-                                    <DropdownMenu.TriggerIcon />
-                                  </Button>
-                                </DropdownMenu.Trigger>
-                                <DropdownMenu.Content
-                                  variant="soft"
-                                  color="indigo"
-                                >
-                                  <DropdownMenu.Item>Admin</DropdownMenu.Item>
-                                  <DropdownMenu.Item>User</DropdownMenu.Item>
-                                  <DropdownMenu.Item>Editor</DropdownMenu.Item>
-                                </DropdownMenu.Content>
-                              </DropdownMenu.Root>
-                            </Box>
-                          </Flex>
-                          <Box className="mt-4">
-                            <label>
-                              <Text as="span" size="2" mb="1" weight="bold">
-                                Phone number{" "}
-                                <Text className="text-red-600">*</Text>
-                              </Text>
-                              <TextField.Root
-                                size="3"
-                                type="number"
-                                defaultValue=""
-                                placeholder="Enter your phone number"
-                              />
-                            </label>
-                          </Box>
-                          <Flex gap="3" className="mt-4">
-                            <Box className="w-6/12">
-                              <label>
-                                <Text as="span" size="2" mb="1" weight="bold">
-                                  First Name{" "}
-                                  <Text className="text-red-600">*</Text>
-                                </Text>
-                                <TextField.Root
-                                  size="3"
-                                  defaultValue=""
-                                  placeholder="Enter your first name"
-                                />
-                              </label>
-                            </Box>
-                            <Box className="w-6/12">
-                              <label>
-                                <Text as="span" size="2" mb="1" weight="bold">
-                                  Last Name{" "}
-                                  <Text className="text-red-600">*</Text>
-                                </Text>
-                                <TextField.Root
-                                  size="3"
-                                  defaultValue=""
-                                  placeholder="Enter your last name"
-                                />
-                              </label>
-                            </Box>
-                          </Flex>
-                          <Box className="mt-4">
-                            <label>
-                              <Text as="span" size="2" mb="1">
-                                Password <Text className="text-red-600">*</Text>
-                              </Text>
-                              <TextField.Root
-                                size="3"
-                                variant="classic"
-                                type="password"
-                                defaultValue=""
-                                placeholder="Enter your password"
-                              >
-                                <TextField.Slot side="left" color="violet">
-                                  <LockClosedIcon height="16" width="16" />
-                                </TextField.Slot>
-                                <TextField.Slot side="right">
-                                  <EyeOpenIcon height="16" width="16" />
-                                </TextField.Slot>
-                              </TextField.Root>
-                              <TextField.Root
-                                size="3"
-                                className="mt-4"
-                                variant="classic"
-                                type="password"
-                                defaultValue=""
-                                placeholder="Enter your confirm password"
-                              >
-                                <TextField.Slot side="left" color="violet">
-                                  <LockClosedIcon height="16" width="16" />
-                                </TextField.Slot>
-                                <TextField.Slot side="right">
-                                  <EyeClosedIcon height="16" width="16" />
-                                </TextField.Slot>
-                              </TextField.Root>
-                            </label>
-                          </Box>
-                        </Box>
-                        <Separator
-                          orientation="vertical"
-                          className="!h-auto sm:block hidden"
-                        />
                         <Flex
-                          direction="column"
-                          className="w-4/12 items-center"
-                          gap="4"
+                          gap="3"
+                          className="flex-col sm:flex-row items-center"
                         >
-                          <Text as="span" size="2" mb="1" weight="bold">
-                            Profile Picture
-                          </Text>
-                          <Avatar size="8" src={picDefault} fallback="A" />
-                          <Button
-                            size="3"
-                            color="gray"
-                            variant="outline"
-                            highContrast
-                            onClick={handleButtonClick}
-                            className="!w-max"
-                          >
-                            Select Image
-                          </Button>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            ref={fileInputRef}
-                            className="hidden"
+                          <Box className="sm:w-8/12 w-full">
+                            <Flex gap="3" className="mt-4">
+                              <Box className="w-8/12">
+                                <label>
+                                  <Text as="span" size="2" mb="1" weight="bold">
+                                    Email{" "}
+                                    <Text className="text-red-600">*</Text>
+                                  </Text>
+                                  <TextField.Root
+                                    size="3"
+                                    defaultValue=""
+                                    placeholder="Enter your email"
+                                  />
+                                </label>
+                              </Box>
+                              <Box className="w-4/12">
+                                <Text as="span" size="2" mb="1" weight="bold">
+                                  Role
+                                </Text>
+                                <DropdownMenu.Root>
+                                  <DropdownMenu.Trigger>
+                                    <Button
+                                      size="3"
+                                      variant="soft"
+                                      color="gray"
+                                      className="!w-full !justify-between"
+                                    >
+                                      Select
+                                      <DropdownMenu.TriggerIcon />
+                                    </Button>
+                                  </DropdownMenu.Trigger>
+                                  <DropdownMenu.Content
+                                    variant="soft"
+                                    color="indigo"
+                                  >
+                                    <DropdownMenu.Item>Admin</DropdownMenu.Item>
+                                    <DropdownMenu.Item>User</DropdownMenu.Item>
+                                    <DropdownMenu.Item>
+                                      Editor
+                                    </DropdownMenu.Item>
+                                  </DropdownMenu.Content>
+                                </DropdownMenu.Root>
+                              </Box>
+                            </Flex>
+                            <Box className="mt-4">
+                              <label>
+                                <Text as="span" size="2" mb="1" weight="bold">
+                                  Phone number{" "}
+                                  <Text className="text-red-600">*</Text>
+                                </Text>
+                                <TextField.Root
+                                  size="3"
+                                  type="number"
+                                  defaultValue=""
+                                  placeholder="Enter your phone number"
+                                />
+                              </label>
+                            </Box>
+                            <Flex gap="3" className="mt-4">
+                              <Box className="w-6/12">
+                                <label>
+                                  <Text as="span" size="2" mb="1" weight="bold">
+                                    First Name{" "}
+                                    <Text className="text-red-600">*</Text>
+                                  </Text>
+                                  <TextField.Root
+                                    size="3"
+                                    defaultValue=""
+                                    placeholder="Enter your first name"
+                                  />
+                                </label>
+                              </Box>
+                              <Box className="w-6/12">
+                                <label>
+                                  <Text as="span" size="2" mb="1" weight="bold">
+                                    Last Name{" "}
+                                    <Text className="text-red-600">*</Text>
+                                  </Text>
+                                  <TextField.Root
+                                    size="3"
+                                    defaultValue=""
+                                    placeholder="Enter your last name"
+                                  />
+                                </label>
+                              </Box>
+                            </Flex>
+                            <Box className="mt-4">
+                              <label>
+                                <Text as="span" size="2" mb="1">
+                                  Password{" "}
+                                  <Text className="text-red-600">*</Text>
+                                </Text>
+                                <TextField.Root
+                                  size="3"
+                                  variant="classic"
+                                  type="password"
+                                  defaultValue=""
+                                  placeholder="Enter your password"
+                                >
+                                  <TextField.Slot side="left" color="violet">
+                                    <LockClosedIcon height="16" width="16" />
+                                  </TextField.Slot>
+                                  <TextField.Slot side="right">
+                                    <EyeOpenIcon height="16" width="16" />
+                                  </TextField.Slot>
+                                </TextField.Root>
+                                <TextField.Root
+                                  size="3"
+                                  className="mt-4"
+                                  variant="classic"
+                                  type="password"
+                                  defaultValue=""
+                                  placeholder="Enter your confirm password"
+                                >
+                                  <TextField.Slot side="left" color="violet">
+                                    <LockClosedIcon height="16" width="16" />
+                                  </TextField.Slot>
+                                  <TextField.Slot side="right">
+                                    <EyeClosedIcon height="16" width="16" />
+                                  </TextField.Slot>
+                                </TextField.Root>
+                              </label>
+                            </Box>
+                          </Box>
+                          <Separator
+                            orientation="vertical"
+                            className="!h-auto sm:block hidden"
                           />
-                        </Flex>
-                      </Flex>
-
-                      <Flex gap="3" className="my-6" justify="start">
-                        <Dialog.Close>
-                          <Button variant="soft" color="gray" size="3">
-                            Cancel
-                          </Button>
-                        </Dialog.Close>
-                        <Dialog.Close>
-                          <Button
-                            color="gray"
-                            variant="solid"
-                            highContrast
-                            size="3"
+                          <Flex
+                            direction="column"
+                            className="w-4/12 items-center"
+                            gap="4"
                           >
-                            Save Edit
-                          </Button>
-                        </Dialog.Close>
-                      </Flex>
-                    </Dialog.Content>
-                  </Dialog.Root>
+                            <Text as="span" size="2" mb="1" weight="bold">
+                              Profile Picture
+                            </Text>
+                            <Avatar size="8" src={picDefault} fallback="A" />
+                            <Button
+                              size="3"
+                              color="gray"
+                              variant="outline"
+                              highContrast
+                              onClick={handleButtonClick}
+                              className="!w-max"
+                            >
+                              Select Image
+                            </Button>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              ref={fileInputRef}
+                              className="hidden"
+                            />
+                          </Flex>
+                        </Flex>
 
-                  <AlertDialog.Root>
-                    <AlertDialog.Trigger>
-                      <IconButton color="crimson" variant="soft">
-                        <Cross2Icon width="18" height="18" />
-                      </IconButton>
-                    </AlertDialog.Trigger>
-                    <AlertDialog.Content maxWidth="450px">
-                      <AlertDialog.Title>Delete User 123</AlertDialog.Title>
-                      <AlertDialog.Description size="2">
-                        Are you sure? This application will no longer be
-                        accessible and any existing sessions will be expired.
-                      </AlertDialog.Description>
+                        <Flex gap="3" className="my-6" justify="start">
+                          <Dialog.Close>
+                            <Button variant="soft" color="gray" size="3">
+                              Cancel
+                            </Button>
+                          </Dialog.Close>
+                          <Dialog.Close>
+                            <Button
+                              color="gray"
+                              variant="solid"
+                              highContrast
+                              size="3"
+                            >
+                              Save Edit
+                            </Button>
+                          </Dialog.Close>
+                        </Flex>
+                      </Dialog.Content>
+                    </Dialog.Root>
 
-                      <Flex gap="3" mt="4" justify="end">
-                        <AlertDialog.Cancel>
-                          <Button variant="soft" color="gray" size="3">
-                            Cancel
-                          </Button>
-                        </AlertDialog.Cancel>
-                        <AlertDialog.Action>
-                          <Button variant="solid" color="red" size="3">
-                            Yes, I agree
-                          </Button>
-                        </AlertDialog.Action>
-                      </Flex>
-                    </AlertDialog.Content>
-                  </AlertDialog.Root>
-                </Flex>
-              </Table.Cell>
-            </Table.Row>
-            <Table.Row>
-              <Table.Cell>1</Table.Cell>
-              <Table.Cell>huynhca@example.com</Table.Cell>
-              <Table.Cell>0813436664</Table.Cell>
-              <Table.Cell>Cai Hoang</Table.Cell>
-              <Table.Cell>Huynh</Table.Cell>
-              <Table.Cell>Admin</Table.Cell>
-              <Table.Cell>
-                <Flex gap="4">
-                  <IconButton color="amber" variant="soft">
-                    <Pencil2Icon width="18" height="18" />
-                  </IconButton>
-                  <IconButton color="crimson" variant="soft">
-                    <Cross2Icon width="18" height="18" />
-                  </IconButton>
-                </Flex>
-              </Table.Cell>
-            </Table.Row>
-            <Table.Row>
-              <Table.Cell>1</Table.Cell>
-              <Table.Cell>huynhca@example.com</Table.Cell>
-              <Table.Cell>0813436664</Table.Cell>
-              <Table.Cell>Cai Hoang</Table.Cell>
-              <Table.Cell>Huynh</Table.Cell>
-              <Table.Cell>Admin</Table.Cell>
-              <Table.Cell>
-                <Flex gap="4">
-                  <IconButton color="amber" variant="soft">
-                    <Pencil2Icon width="18" height="18" />
-                  </IconButton>
-                  <IconButton color="crimson" variant="soft">
-                    <Cross2Icon width="18" height="18" />
-                  </IconButton>
-                </Flex>
-              </Table.Cell>
-            </Table.Row>
-            <Table.Row>
-              <Table.Cell>1</Table.Cell>
-              <Table.Cell>huynhca@example.com</Table.Cell>
-              <Table.Cell>0813436664</Table.Cell>
-              <Table.Cell>Cai Hoang</Table.Cell>
-              <Table.Cell>Huynh</Table.Cell>
-              <Table.Cell>Admin</Table.Cell>
-              <Table.Cell>
-                <Flex gap="4">
-                  <IconButton color="amber" variant="soft">
-                    <Pencil2Icon width="18" height="18" />
-                  </IconButton>
-                  <IconButton color="crimson" variant="soft">
-                    <Cross2Icon width="18" height="18" />
-                  </IconButton>
-                </Flex>
-              </Table.Cell>
-            </Table.Row>
-            <Table.Row>
-              <Table.Cell>1</Table.Cell>
-              <Table.Cell>huynhca@example.com</Table.Cell>
-              <Table.Cell>0813436664</Table.Cell>
-              <Table.Cell>Cai Hoang</Table.Cell>
-              <Table.Cell>Huynh</Table.Cell>
-              <Table.Cell>Admin</Table.Cell>
-              <Table.Cell>
-                <Flex gap="4">
-                  <IconButton color="amber" variant="soft">
-                    <Pencil2Icon width="18" height="18" />
-                  </IconButton>
-                  <IconButton color="crimson" variant="soft">
-                    <Cross2Icon width="18" height="18" />
-                  </IconButton>
-                </Flex>
-              </Table.Cell>
-            </Table.Row>
+                    <AlertDialog.Root>
+                      <AlertDialog.Trigger>
+                        <IconButton color="crimson" variant="soft">
+                          <Cross2Icon width="18" height="18" />
+                        </IconButton>
+                      </AlertDialog.Trigger>
+                      <AlertDialog.Content maxWidth="450px">
+                        <AlertDialog.Title>
+                          Delete User {user.firstName}
+                        </AlertDialog.Title>
+                        <AlertDialog.Description size="2">
+                          Are you sure? This application will no longer be
+                          accessible and any existing sessions will be expired.
+                        </AlertDialog.Description>
+
+                        <Flex gap="3" mt="4" justify="end">
+                          <AlertDialog.Cancel>
+                            <Button variant="soft" color="gray" size="3">
+                              Cancel
+                            </Button>
+                          </AlertDialog.Cancel>
+                          <AlertDialog.Action>
+                            <Button variant="solid" color="red" size="3">
+                              Yes, I agree
+                            </Button>
+                          </AlertDialog.Action>
+                        </Flex>
+                      </AlertDialog.Content>
+                    </AlertDialog.Root>
+                  </Flex>
+                </Table.Cell>
+              </Table.Row>
+            ))}
           </Table.Body>
         </Table.Root>
         <Flex className="my-6 sm:!justify-end !justify-center  px-4">

@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.transform {
+    transition: transform 0.5s ease-out;
+  }

@@ -11,11 +11,21 @@ import {
 } from "@radix-ui/themes";
 import defaultAvatar from "../assets/images/imgUser.png";
 import { BellIcon, HamburgerMenuIcon } from "@radix-ui/react-icons";
+import { useState } from "react";
 
-function Header() {
+function Header({ handleToggleMenu, handleToggleMenuMobile }) {
   return (
     <Flex className="h-16 border-b-2 border-gray-100 items-center px-3 sm:px-0">
-      <Box className="sm:h-16 sm:w-16 h-12 w-12 rounded-lg sm:rounded-none !flex justify-center items-center cursor-pointer bg-gray-800">
+      <Box
+        className="!hidden h-16 w-16  rounded-none sm:!flex justify-center items-center cursor-pointer bg-gray-800"
+        onClick={handleToggleMenu}
+      >
+        <HamburgerMenuIcon className="h-6 w-6 text-white" />
+      </Box>
+      <Box
+        className="sm:!hidden h-12 w-12 rounded-lg !flex justify-center items-center cursor-pointer bg-gray-800"
+        onClick={handleToggleMenuMobile}
+      >
         <HamburgerMenuIcon className="h-6 w-6 text-white" />
       </Box>
       <Container size="4" className="justify-center">
