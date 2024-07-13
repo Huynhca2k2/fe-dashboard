@@ -321,6 +321,8 @@ const users = [
     email: "tranminhn@gmail.com",
     phoneNumber: "0936471528",
     firstName: "Tran",
+    lastName: "B",
+    role: "User",
   },
 ];
 

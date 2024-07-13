@@ -3,6 +3,7 @@ import {
   Avatar,
   Box,
   Button,
+  Callout,
   Card,
   Container,
   Dialog,
@@ -25,6 +26,7 @@ import {
   DoubleArrowRightIcon,
   EyeClosedIcon,
   EyeOpenIcon,
+  InfoCircledIcon,
   LockClosedIcon,
   MagnifyingGlassIcon,
   Pencil2Icon,
@@ -40,16 +42,26 @@ import {
 
 function Home() {
   const [users, setUsers] = useState([]);
-  const [itemStart, setItemStart] = useState(5);
-  const [itemsEnd, setItemEnd] = useState(10);
+  const [usersClone, setUsersClone] = useState([]);
+  const [listUserNew, setListUserNew] = useState([]);
+  const [itemStart, setItemStart] = useState(0);
+  const [itemsEnd, setItemEnd] = useState(5);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchRole, setSearchRole] = useState("");
+  const [increaseFirst, setIncreaseFirst] = useState(true);
+  const [increaseLast, setIncreaseLast] = useState(true);
+  const [increaseRole, setIncreaseRole] = useState(true);
+  const [rowQuantity, setRowQuantity] = useState(5);
+  const [isClickSearch, setIsClickSearch] = useState(false);
 
   useEffect(() => {
     const getUsers = async () => {
       try {
         const data = await getAllUser();
         setUsers(data);
+        setUsersClone(data);
       } catch (error) {
         setError(error);
       } finally {
@@ -60,8 +72,224 @@ function Home() {
     getUsers();
   }, []);
 
+  //cat mang tuy vao so luong hang
   const handleSliceUser = () => {
-    return users.slice(itemStart, itemsEnd);
+    //neu truong hop do dai mang be hon gioi han itemend cong them
+    let limitEnd = usersClone.length < itemsEnd ? usersClone.length : itemsEnd;
+    setListUserNew(usersClone.slice(itemStart, limitEnd));
+  };
+
+  useEffect(() => {
+    handleSliceUser();
+  }, [itemStart, itemsEnd, usersClone]);
+
+  //search nhieu dieu kien
+  const handleChangeSearch = (e) => {
+    setSearchTerm(e.target.value);
+    if (e.target.value === "") {
+      setUsersClone(users);
+    }
+  };
+
+  const handleSelect = (role) => {
+    setSearchRole(role);
+  };
+
+  const handleSearch = () => {
+    setIsClickSearch(true);
+    const filteredUsers = users.filter((user) => {
+      // kiem tra dieu kien phone, first name, last
+      const matchSearchTerm =
+        user.phoneNumber.includes(searchTerm) ||
+        user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase());
+
+      //kiem tra role neu de trong la lay het hoac co role cu the
+      const matchSearchRole = searchRole === "" || user.role === searchRole;
+
+      return matchSearchTerm && matchSearchRole;
+    });
+
+    setUsersClone(filteredUsers);
+    setItemStart(0);
+    setItemEnd(rowQuantity);
+  };
+
+  //sort theo firstname, lastname, role
+  const handleSortByFirst = () => {
+    setIncreaseFirst(!increaseFirst);
+    let sortedUsers;
+    //sap xep tang
+    if (increaseFirst) {
+      sortedUsers = [...usersClone].sort((a, b) => {
+        const nameA = a.firstName.toLowerCase();
+        const nameB = b.firstName.toLowerCase();
+        if (nameA < nameB) {
+          return -1;
+        }
+        if (nameA > nameB) {
+          return 1;
+        }
+        return 0;
+      });
+    } else {
+      //sap xep giam
+      sortedUsers = [...usersClone].sort((a, b) => {
+        const nameA = a.firstName.toLowerCase();
+        const nameB = b.firstName.toLowerCase();
+        if (nameA > nameB) {
+          return -1;
+        }
+        if (nameA < nameB) {
+          return 1;
+        }
+        return 0;
+      });
+    }
+
+    setUsersClone(sortedUsers);
+  };
+
+  const handleSortByLast = () => {
+    setIncreaseLast(!increaseLast);
+    let sortedUsers;
+    //sap xep tang
+    if (increaseLast) {
+      sortedUsers = [...usersClone].sort((a, b) => {
+        const nameA = a?.lastName?.toLowerCase();
+        const nameB = b?.lastName?.toLowerCase();
+        if (nameA < nameB) {
+          return -1;
+        }
+        if (nameA > nameB) {
+          return 1;
+        }
+        return 0;
+      });
+    } else {
+      //sap xep giam
+      sortedUsers = [...usersClone].sort((a, b) => {
+        const nameA = a?.lastName?.toLowerCase();
+        const nameB = b?.lastName?.toLowerCase();
+        if (nameA > nameB) {
+          return -1;
+        }
+        if (nameA < nameB) {
+          return 1;
+        }
+        return 0;
+      });
+    }
+
+    setUsersClone(sortedUsers);
+  };
+
+  const handleSortByRole = () => {
+    setIncreaseRole(!increaseRole);
+    let sortedUsers;
+    //sap xep tang
+    if (increaseRole) {
+      sortedUsers = [...usersClone].sort((a, b) => {
+        const nameA = a.role.toLowerCase();
+        const nameB = b.role.toLowerCase();
+        if (nameA < nameB) {
+          return -1;
+        }
+        if (nameA > nameB) {
+          return 1;
+        }
+        return 0;
+      });
+    } else {
+      //sap xep giam
+      sortedUsers = [...usersClone].sort((a, b) => {
+        const nameA = a.role.toLowerCase();
+        const nameB = b.role.toLowerCase();
+        if (nameA > nameB) {
+          return -1;
+        }
+        if (nameA < nameB) {
+          return 1;
+        }
+        return 0;
+      });
+    }
+
+    setUsersClone(sortedUsers);
+  };
+
+  //navigation bar
+  //row of page
+  const handleRowOfPage = (numberRow) => {
+    switch (numberRow) {
+      case "10":
+        setRowQuantity(10);
+        setItemStart(0);
+        setItemEnd(10);
+        break;
+      case "15":
+        setRowQuantity(15);
+        setItemStart(0);
+        setItemEnd(15);
+        break;
+      case "20":
+        setRowQuantity(20);
+        setItemStart(0);
+        setItemEnd(20);
+        break;
+      default:
+        setRowQuantity(5);
+        setItemStart(0);
+        setItemEnd(5);
+    }
+  };
+
+  //next, next more, prev, prev more
+  const handleNext = () => {
+    if (
+      itemStart < usersClone.length - rowQuantity &&
+      itemsEnd < usersClone.length
+    ) {
+      setItemStart(itemStart + rowQuantity);
+      setItemEnd(itemsEnd + rowQuantity);
+    }
+  };
+  const handlePrev = () => {
+    if (itemStart > 0 && itemsEnd > rowQuantity) {
+      setItemStart(itemStart - rowQuantity);
+
+      //khi so itemsend dang o cuoi mang va so luong phan tu nho hon rowquantity
+      const endIndex = usersClone.length % rowQuantity;
+
+      if (endIndex > 0 && endIndex < rowQuantity) {
+        if (itemsEnd > usersClone.length) {
+          setItemEnd(usersClone.length - endIndex);
+        } else {
+          setItemEnd(itemsEnd - endIndex);
+        }
+      } else {
+        setItemEnd(itemsEnd - rowQuantity);
+      }
+    }
+  };
+
+  const handlePrevMore = () => {
+    setItemStart(0);
+    setItemEnd(rowQuantity);
+  };
+
+  const handleNextMore = () => {
+    const totalUser = usersClone.length;
+    //tim vi tri dau tien cua nhung phan tu cuoi mang
+    const startIndex = (totalUser % rowQuantity) - 1;
+
+    if (startIndex < 0 && startIndex < rowQuantity) {
+      setItemStart(totalUser - rowQuantity);
+      setItemEnd(totalUser);
+    } else {
+      setItemStart(totalUser - startIndex - 1);
+      setItemEnd(totalUser);
+    }
   };
 
   //config upload image
@@ -77,13 +305,23 @@ function Home() {
         <Flex className="mt-4 !justify-between items-center px-4">
           <Text className="text-lg font-medium">Users</Text>
           <Flex className="gap-4">
-            <Button color="gray" variant="soft" highContrast>
+            <Button
+              color="gray"
+              variant="soft"
+              highContrast
+              className="!cursor-pointer"
+            >
               Export to Excel
             </Button>
 
             <Dialog.Root>
               <Dialog.Trigger>
-                <Button color="gray" variant="outline" highContrast>
+                <Button
+                  color="gray"
+                  variant="outline"
+                  highContrast
+                  className="!cursor-pointer"
+                >
                   Add New User
                 </Button>
               </Dialog.Trigger>
@@ -116,7 +354,7 @@ function Home() {
                               size="3"
                               variant="soft"
                               color="gray"
-                              className="!w-full !justify-between"
+                              className="!w-full !justify-between !cursor-pointer"
                             >
                               Select
                               <DropdownMenu.TriggerIcon />
@@ -229,6 +467,7 @@ function Home() {
                       variant="outline"
                       highContrast
                       onClick={handleButtonClick}
+                      className="!cursor-pointer"
                     >
                       Select Image
                     </Button>
@@ -243,12 +482,23 @@ function Home() {
 
                 <Flex gap="3" className="my-6" justify="end">
                   <Dialog.Close>
-                    <Button variant="soft" color="gray" size="3">
+                    <Button
+                      variant="soft"
+                      color="gray"
+                      size="3"
+                      className="!cursor-pointer"
+                    >
                       Cancel
                     </Button>
                   </Dialog.Close>
                   <Dialog.Close>
-                    <Button color="gray" variant="solid" highContrast size="3">
+                    <Button
+                      color="gray"
+                      variant="solid"
+                      highContrast
+                      size="3"
+                      className="!cursor-pointer"
+                    >
                       Add User
                     </Button>
                   </Dialog.Close>
@@ -262,6 +512,7 @@ function Home() {
             size="3"
             placeholder="Search name, email, phone…"
             className="sm:!w-[340px] !w-full"
+            onChange={handleChangeSearch}
           >
             <TextField.Slot>
               <MagnifyingGlassIcon height="24" width="24" />
@@ -270,15 +521,29 @@ function Home() {
           <Box className="!hidden sm:!block">
             <DropdownMenu.Root>
               <DropdownMenu.Trigger>
-                <Button variant="soft" color="gray" size="3">
-                  Roles
+                <Button
+                  variant="soft"
+                  color="gray"
+                  size="3"
+                  className="!cursor-pointer"
+                >
+                  {searchRole === "" ? "Roles" : searchRole}
                   <DropdownMenu.TriggerIcon />
                 </Button>
               </DropdownMenu.Trigger>
               <DropdownMenu.Content size="2">
-                <DropdownMenu.Item>Admin</DropdownMenu.Item>
-                <DropdownMenu.Item>User</DropdownMenu.Item>
-                <DropdownMenu.Item>Editor</DropdownMenu.Item>
+                <DropdownMenu.Item onSelect={() => handleSelect("")}>
+                  All Role
+                </DropdownMenu.Item>
+                <DropdownMenu.Item onSelect={() => handleSelect("Admin")}>
+                  Admin
+                </DropdownMenu.Item>
+                <DropdownMenu.Item onSelect={() => handleSelect("User")}>
+                  User
+                </DropdownMenu.Item>
+                <DropdownMenu.Item onSelect={() => handleSelect("Editor")}>
+                  Editor
+                </DropdownMenu.Item>
               </DropdownMenu.Content>
             </DropdownMenu.Root>
           </Box>
@@ -288,7 +553,8 @@ function Home() {
             color="gray"
             variant="solid"
             highContrast
-            className="!min-w-[80px]"
+            className="!min-w-[80px] !cursor-pointer"
+            onClick={handleSearch}
           >
             Search
           </Button>
@@ -297,14 +563,23 @@ function Home() {
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
               <Button variant="soft" color="gray" size="3">
-                Roles
+                {searchRole === "" ? "Roles" : searchRole}
                 <DropdownMenu.TriggerIcon />
               </Button>
             </DropdownMenu.Trigger>
             <DropdownMenu.Content size="2">
-              <DropdownMenu.Item>Admin</DropdownMenu.Item>
-              <DropdownMenu.Item>User</DropdownMenu.Item>
-              <DropdownMenu.Item>Editor</DropdownMenu.Item>
+              <DropdownMenu.Item onSelect={() => handleSelect("")}>
+                All Role
+              </DropdownMenu.Item>
+              <DropdownMenu.Item onSelect={() => handleSelect("Admin")}>
+                Admin
+              </DropdownMenu.Item>
+              <DropdownMenu.Item onSelect={() => handleSelect("User")}>
+                User
+              </DropdownMenu.Item>
+              <DropdownMenu.Item onSelect={() => handleSelect("Editor")}>
+                Editor
+              </DropdownMenu.Item>
             </DropdownMenu.Content>
           </DropdownMenu.Root>
         </Flex>
@@ -318,7 +593,7 @@ function Home() {
                 <Flex className="items-center">
                   <Text>Firstname</Text>
                   <Box className="p-1 hover:bg-slate-100 rounded-sm cursor-pointer">
-                    <CaretSortIcon />
+                    <CaretSortIcon onClick={handleSortByFirst} />
                   </Box>
                 </Flex>
               </Table.ColumnHeaderCell>
@@ -326,7 +601,7 @@ function Home() {
                 <Flex className="items-center">
                   <Text>Lastname</Text>
                   <Box className="p-1 hover:bg-slate-100 rounded-sm cursor-pointer">
-                    <CaretSortIcon />
+                    <CaretSortIcon onClick={handleSortByLast} />
                   </Box>
                 </Flex>
               </Table.ColumnHeaderCell>
@@ -334,7 +609,7 @@ function Home() {
                 <Flex className="items-center">
                   <Text>Role</Text>
                   <Box className="p-1 hover:bg-slate-100 rounded-sm cursor-pointer">
-                    <CaretSortIcon />
+                    <CaretSortIcon onClick={handleSortByRole} />
                   </Box>
                 </Flex>
               </Table.ColumnHeaderCell>
@@ -343,7 +618,7 @@ function Home() {
           </Table.Header>
 
           <Table.Body>
-            {users.slice(itemStart, itemsEnd).map((user) => (
+            {listUserNew.map((user) => (
               <Table.Row key={user.id}>
                 <Table.Cell>{user.id}</Table.Cell>
                 <Table.Cell>{user.email}</Table.Cell>
@@ -355,7 +630,11 @@ function Home() {
                   <Flex gap="4">
                     <Dialog.Root>
                       <Dialog.Trigger>
-                        <IconButton color="amber" variant="soft">
+                        <IconButton
+                          color="amber"
+                          variant="soft"
+                          className="!cursor-pointer"
+                        >
                           <Pencil2Icon width="18" height="18" />
                         </IconButton>
                       </Dialog.Trigger>
@@ -392,7 +671,7 @@ function Home() {
                                       size="3"
                                       variant="soft"
                                       color="gray"
-                                      className="!w-full !justify-between"
+                                      className="!w-full !justify-between !cursor-pointer"
                                     >
                                       Select
                                       <DropdownMenu.TriggerIcon />
@@ -510,7 +789,7 @@ function Home() {
                               variant="outline"
                               highContrast
                               onClick={handleButtonClick}
-                              className="!w-max"
+                              className="!w-max !cursor-pointer"
                             >
                               Select Image
                             </Button>
@@ -525,7 +804,12 @@ function Home() {
 
                         <Flex gap="3" className="my-6" justify="start">
                           <Dialog.Close>
-                            <Button variant="soft" color="gray" size="3">
+                            <Button
+                              variant="soft"
+                              color="gray"
+                              size="3"
+                              className="!cursor-pointer"
+                            >
                               Cancel
                             </Button>
                           </Dialog.Close>
@@ -535,6 +819,7 @@ function Home() {
                               variant="solid"
                               highContrast
                               size="3"
+                              className="!cursor-pointer"
                             >
                               Save Edit
                             </Button>
@@ -545,7 +830,11 @@ function Home() {
 
                     <AlertDialog.Root>
                       <AlertDialog.Trigger>
-                        <IconButton color="crimson" variant="soft">
+                        <IconButton
+                          color="crimson"
+                          variant="soft"
+                          className="!cursor-pointer"
+                        >
                           <Cross2Icon width="18" height="18" />
                         </IconButton>
                       </AlertDialog.Trigger>
@@ -560,12 +849,22 @@ function Home() {
 
                         <Flex gap="3" mt="4" justify="end">
                           <AlertDialog.Cancel>
-                            <Button variant="soft" color="gray" size="3">
+                            <Button
+                              variant="soft"
+                              color="gray"
+                              size="3"
+                              className="!cursor-pointer"
+                            >
                               Cancel
                             </Button>
                           </AlertDialog.Cancel>
                           <AlertDialog.Action>
-                            <Button variant="solid" color="red" size="3">
+                            <Button
+                              variant="solid"
+                              color="red"
+                              size="3"
+                              className="!cursor-pointer"
+                            >
                               Yes, I agree
                             </Button>
                           </AlertDialog.Action>
@@ -578,38 +877,90 @@ function Home() {
             ))}
           </Table.Body>
         </Table.Root>
+        {usersClone.length === 0 && isClickSearch && (
+          <Flex className="w-full !justify-center">
+            <Callout.Root color="gray" className="mt-2 sm:w-[50%] w-full">
+              <Callout.Icon>
+                <InfoCircledIcon />
+              </Callout.Icon>
+              <Callout.Text>
+                No results found matching "{searchTerm}"{" "}
+                {searchRole === "" ? "" : "and role: " + searchRole}
+              </Callout.Text>
+            </Callout.Root>
+          </Flex>
+        )}
+
         <Flex className="my-6 sm:!justify-end !justify-center  px-4">
           <Flex className="items-center gap-6 flex-col sm:flex-row">
             <Flex className="!justify-between items-center gap-4">
               <Text>Rows per Page</Text>
               <DropdownMenu.Root>
                 <DropdownMenu.Trigger>
-                  <Button variant="soft" color="gray">
-                    5
+                  <Button
+                    variant="soft"
+                    color="gray"
+                    className="!cursor-pointer"
+                  >
+                    {rowQuantity}
                     <DropdownMenu.TriggerIcon />
                   </Button>
                 </DropdownMenu.Trigger>
                 <DropdownMenu.Content>
-                  <DropdownMenu.Item>5</DropdownMenu.Item>
-                  <DropdownMenu.Item>10</DropdownMenu.Item>
-                  <DropdownMenu.Item>15</DropdownMenu.Item>
-                  <DropdownMenu.Item>20</DropdownMenu.Item>
+                  <DropdownMenu.Item onSelect={() => handleRowOfPage("5")}>
+                    5
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item onSelect={() => handleRowOfPage("10")}>
+                    10
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item onSelect={() => handleRowOfPage("15")}>
+                    15
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item onSelect={() => handleRowOfPage("20")}>
+                    20
+                  </DropdownMenu.Item>
                 </DropdownMenu.Content>
               </DropdownMenu.Root>
-              <Text>1 - 5 of 25</Text>
+              <Text>
+                {itemStart + 1 + " - "}
+                <Text>
+                  {itemsEnd > usersClone.length ? usersClone.length : itemsEnd}
+                </Text>
+                <Text>{" of " + usersClone.length}</Text>
+              </Text>
             </Flex>
 
             <Flex gap="3">
-              <IconButton color="gray" variant="soft">
+              <IconButton
+                color="gray"
+                variant="soft"
+                onClick={handlePrevMore}
+                className="!cursor-pointer"
+              >
                 <DoubleArrowLeftIcon width="18" height="18" />
               </IconButton>
-              <IconButton color="gray" variant="soft">
+              <IconButton
+                color="gray"
+                variant="soft"
+                onClick={handlePrev}
+                className="!cursor-pointer"
+              >
                 <ChevronLeftIcon width="18" height="18" />
               </IconButton>
-              <IconButton color="gray" variant="soft">
+              <IconButton
+                color="gray"
+                variant="soft"
+                onClick={handleNext}
+                className="!cursor-pointer"
+              >
                 <ChevronRightIcon width="18" height="18" />
               </IconButton>
-              <IconButton color="gray" variant="soft">
+              <IconButton
+                color="gray"
+                variant="soft"
+                onClick={handleNextMore}
+                className="!cursor-pointer"
+              >
                 <DoubleArrowRightIcon width="18" height="18" />
               </IconButton>
             </Flex>
