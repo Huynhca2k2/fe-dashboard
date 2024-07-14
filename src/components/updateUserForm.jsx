@@ -68,6 +68,7 @@ const UpdateUserForm = ({ user, isRefesh, setIsRefesh }) => {
   //update user
   const onSubmit = async (data) => {
     //set urlimage khi nguoi dung da upload hinh anh
+    console.log("url image", urlImage);
     if (urlImage) {
       setValue("image", urlImage);
     }
