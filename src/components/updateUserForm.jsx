@@ -51,6 +51,7 @@ const UpdateUserForm = ({ user, isRefesh, setIsRefesh }) => {
   const [userItem, setUserItem] = useState(user);
   const [selectedRole, setSelectedRole] = useState(userItem.role);
   setValue("role", userItem.role);
+
   setValue("updatedAt", new Date().toISOString());
   const [valueNotChange, setValueNotChange] = useState(false);
 
@@ -67,10 +68,7 @@ const UpdateUserForm = ({ user, isRefesh, setIsRefesh }) => {
   //update user
   const onSubmit = async (data) => {
     //set urlimage khi nguoi dung da upload hinh anh
-    console.log("url image", urlImage);
-    if (urlImage) {
-      setValue("image", urlImage);
-    }
+
     if (
       data.email === userItem.email &&
       data.role === userItem.role &&
@@ -86,8 +84,6 @@ const UpdateUserForm = ({ user, isRefesh, setIsRefesh }) => {
       return;
     } else {
       try {
-        setValue("image", urlImage);
-        console.log(data);
         const newUser = await updateUser(userItem._id, data);
         setUserItem(newUser);
         setIsRefesh(!isRefesh);
@@ -124,6 +120,7 @@ const UpdateUserForm = ({ user, isRefesh, setIsRefesh }) => {
     try {
       const pic = await uploadImage(file);
       setUrlImage(pic.image_url);
+      setValue("image", pic.image_url);
     } catch (error) {
       console.error("Error uploading image:", error);
     }
