@@ -17,6 +17,7 @@ import {
   Progress,
   Separator,
   Skeleton,
+  Spinner,
   Table,
   Text,
   TextField,
@@ -671,7 +672,11 @@ function Home() {
             ))}
           </Table.Body>
         </Table.Root>
-        {isLoading && <Progress color="gray" value={valueProcess} />}
+        {isLoading && (
+          <Box className="!flex !justify-center p-3">
+            <Spinner size="3" />
+          </Box>
+        )}
 
         {usersClone.length === 0 && isClickSearch && (
           <Flex className="w-full !justify-center">
