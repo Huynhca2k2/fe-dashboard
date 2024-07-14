@@ -87,6 +87,7 @@ const UpdateUserForm = ({ user, isRefesh, setIsRefesh }) => {
       return;
     } else {
       try {
+        setValue("image", urlImage);
         console.log(data);
         const newUser = await updateUser(userItem._id, data);
         setUserItem(newUser);
