@@ -1,25 +1,33 @@
 import {
   AlertDialog,
   Avatar,
+  Badge,
   Box,
   Button,
   Callout,
   Card,
+  Code,
   Container,
+  DataList,
   Dialog,
   DropdownMenu,
   Flex,
   IconButton,
+  Link,
+  Progress,
   Separator,
+  Skeleton,
   Table,
   Text,
   TextField,
+  Tooltip,
 } from "@radix-ui/themes";
 import {
   BookmarkIcon,
   CaretSortIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  CopyIcon,
   Cross1Icon,
   Cross2Icon,
   DoubleArrowLeftIcon,
@@ -40,13 +48,19 @@ import {
   deleteUser,
 } from "../api/configApi";
 
+import CreateUserForm from "./createUserForm";
+import UpdateUserForm from "./updateUserForm";
+import { useSnackbar } from "notistack";
+import ExportToExcel from "./exportToExcel";
+
 function Home() {
   const [users, setUsers] = useState([]);
   const [usersClone, setUsersClone] = useState([]);
   const [listUserNew, setListUserNew] = useState([]);
   const [itemStart, setItemStart] = useState(0);
   const [itemsEnd, setItemEnd] = useState(5);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [valueProcess, setValueProcess] = useState(0);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchRole, setSearchRole] = useState("");
@@ -55,6 +69,10 @@ function Home() {
   const [increaseRole, setIncreaseRole] = useState(true);
   const [rowQuantity, setRowQuantity] = useState(5);
   const [isClickSearch, setIsClickSearch] = useState(false);
+  const [isRefesh, setIsRefesh] = useState(false);
+  const [isStart, setIsStart] = useState(false);
+  const [isEnd, setIsEnd] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     const getUsers = async () => {
@@ -65,12 +83,13 @@ function Home() {
       } catch (error) {
         setError(error);
       } finally {
-        setLoading(false);
+        setValueProcess(100);
+        setIsLoading(false);
       }
     };
 
     getUsers();
-  }, []);
+  }, [isRefesh]);
 
   //cat mang tuy vao so luong hang
   const handleSliceUser = () => {
@@ -102,6 +121,7 @@ function Home() {
       const matchSearchTerm =
         user.phoneNumber.includes(searchTerm) ||
         user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email.toLowerCase().includes(searchTerm.toLowerCase());
 
       //kiem tra role neu de trong la lay het hoac co role cu the
@@ -246,6 +266,9 @@ function Home() {
 
   //next, next more, prev, prev more
   const handleNext = () => {
+    //neu la phan tu cuoi thi disable nut di
+    //itemsEnd === usersClone.length ? setItemEnd(true) : setIsEnd(false);
+
     if (
       itemStart < usersClone.length - rowQuantity &&
       itemsEnd < usersClone.length
@@ -255,11 +278,15 @@ function Home() {
     }
   };
   const handlePrev = () => {
+    //neu la phan tu dau thi disable nut di
+    //itemStart === 0 ? setItemStart(true) : setIsStart(false);
+
     if (itemStart > 0 && itemsEnd > rowQuantity) {
       setItemStart(itemStart - rowQuantity);
 
       //khi so itemsend dang o cuoi mang va so luong phan tu nho hon rowquantity
-      const endIndex = usersClone.length % rowQuantity;
+
+      const endIndex = itemsEnd % rowQuantity;
 
       if (endIndex > 0 && endIndex < rowQuantity) {
         if (itemsEnd > usersClone.length) {
@@ -274,11 +301,17 @@ function Home() {
   };
 
   const handlePrevMore = () => {
+    //neu la phan tu dau thi disable nut di
+    //itemStart === 0 ? setItemStart(true) : setIsStart(false);
+
     setItemStart(0);
     setItemEnd(rowQuantity);
   };
 
   const handleNextMore = () => {
+    //neu la phan tu cuoi thi disable nut di
+    //itemsEnd === usersClone.length ? setItemEnd(true) : setIsEnd(false);
+
     const totalUser = usersClone.length;
     //tim vi tri dau tien cua nhung phan tu cuoi mang
     const startIndex = (totalUser % rowQuantity) - 1;
@@ -289,6 +322,35 @@ function Home() {
     } else {
       setItemStart(totalUser - startIndex - 1);
       setItemEnd(totalUser);
+    }
+  };
+
+  //delete user
+  const handleDeleteUser = async (idUser) => {
+    try {
+      const result = await deleteUser(idUser);
+      //load lai list user
+      setIsRefesh(!isRefesh);
+      enqueueSnackbar("Delete user success!", {
+        variant: "success",
+        autoHideDuration: 1000,
+      });
+      //su ly khi xoa het tat ca phan tu trong mang nhin thay
+      if (itemStart === itemsEnd - 1) {
+        setItemEnd(usersClone.length);
+        const limitStart = usersClone.length - rowQuantity - 1;
+        if (limitStart < 0) {
+          setItemStart(-1);
+        } else {
+          setItemStart(usersClone.length - rowQuantity - 1);
+        }
+      }
+    } catch (error) {
+      console.error("error: ", error);
+      enqueueSnackbar("Delete user fail!", {
+        variant: "success",
+        autoHideDuration: 1000,
+      });
     }
   };
 
@@ -305,206 +367,14 @@ function Home() {
         <Flex className="mt-4 !justify-between items-center px-4">
           <Text className="text-lg font-medium">Users</Text>
           <Flex className="gap-4">
-            <Button
-              color="gray"
-              variant="soft"
-              highContrast
-              className="!cursor-pointer"
-            >
-              Export to Excel
-            </Button>
+            <ExportToExcel users={users} />
 
-            <Dialog.Root>
-              <Dialog.Trigger>
-                <Button
-                  color="gray"
-                  variant="outline"
-                  highContrast
-                  className="!cursor-pointer"
-                >
-                  Add New User
-                </Button>
-              </Dialog.Trigger>
-
-              <Dialog.Content maxWidth="1024px">
-                <Dialog.Title>Add User</Dialog.Title>
-
-                <Flex gap="3" className="sm:flex-row flex-col">
-                  <Box className="sm:w-8/12 w-full">
-                    <Flex gap="3" className="mt-4">
-                      <Box className="w-8/12">
-                        <label>
-                          <Text as="span" size="2" mb="1" weight="bold">
-                            Email <Text className="text-red-600">*</Text>
-                          </Text>
-                          <TextField.Root
-                            size="3"
-                            defaultValue=""
-                            placeholder="Enter your email"
-                          />
-                        </label>
-                      </Box>
-                      <Box className="w-4/12">
-                        <Text as="span" size="2" mb="1" weight="bold">
-                          Role
-                        </Text>
-                        <DropdownMenu.Root>
-                          <DropdownMenu.Trigger>
-                            <Button
-                              size="3"
-                              variant="soft"
-                              color="gray"
-                              className="!w-full !justify-between !cursor-pointer"
-                            >
-                              Select
-                              <DropdownMenu.TriggerIcon />
-                            </Button>
-                          </DropdownMenu.Trigger>
-                          <DropdownMenu.Content
-                            variant="soft"
-                            color="indigo"
-                            size="2"
-                          >
-                            <DropdownMenu.Item>Admin</DropdownMenu.Item>
-                            <DropdownMenu.Item>User</DropdownMenu.Item>
-                            <DropdownMenu.Item>Editor</DropdownMenu.Item>
-                          </DropdownMenu.Content>
-                        </DropdownMenu.Root>
-                      </Box>
-                    </Flex>
-                    <Box className="mt-4">
-                      <label>
-                        <Text as="span" size="2" mb="1" weight="bold">
-                          Phone number <Text className="text-red-600">*</Text>
-                        </Text>
-                        <TextField.Root
-                          type="number"
-                          size="3"
-                          defaultValue=""
-                          placeholder="Enter your phone number"
-                        />
-                      </label>
-                    </Box>
-                    <Flex gap="3" className="mt-4">
-                      <Box className="w-6/12">
-                        <label>
-                          <Text as="span" size="2" mb="1" weight="bold">
-                            First Name <Text className="text-red-600">*</Text>
-                          </Text>
-                          <TextField.Root
-                            size="3"
-                            defaultValue=""
-                            placeholder="Enter your first name"
-                          />
-                        </label>
-                      </Box>
-                      <Box className="w-6/12">
-                        <label>
-                          <Text as="span" size="2" mb="1" weight="bold">
-                            Last Name <Text className="text-red-600">*</Text>
-                          </Text>
-                          <TextField.Root
-                            size="3"
-                            defaultValue=""
-                            placeholder="Enter your last name"
-                          />
-                        </label>
-                      </Box>
-                    </Flex>
-                    <Box className="mt-4">
-                      <label>
-                        <Text as="span" size="2" mb="1">
-                          Password <Text className="text-red-600">*</Text>
-                        </Text>
-                        <TextField.Root
-                          size="3"
-                          variant="classic"
-                          type="password"
-                          defaultValue=""
-                          placeholder="Enter your password"
-                        >
-                          <TextField.Slot side="left" color="violet">
-                            <LockClosedIcon height="16" width="16" />
-                          </TextField.Slot>
-                          <TextField.Slot side="right">
-                            <EyeOpenIcon height="16" width="16" />
-                          </TextField.Slot>
-                        </TextField.Root>
-                        <TextField.Root
-                          size="3"
-                          className="mt-4"
-                          variant="classic"
-                          type="password"
-                          defaultValue=""
-                          placeholder="Enter your confirm password"
-                        >
-                          <TextField.Slot side="left" color="violet">
-                            <LockClosedIcon height="16" width="16" />
-                          </TextField.Slot>
-                          <TextField.Slot side="right">
-                            <EyeClosedIcon height="16" width="16" />
-                          </TextField.Slot>
-                        </TextField.Root>
-                      </label>
-                    </Box>
-                  </Box>
-                  <Separator
-                    orientation="vertical"
-                    className="!h-auto hidden sm:block"
-                  />
-                  <Flex
-                    direction="column"
-                    className="sm:w-4/12 w-full items-center"
-                    gap="4"
-                  >
-                    <Text as="span" size="2" mb="1" weight="bold">
-                      Profile Picture
-                    </Text>
-                    <Avatar size="8" src={picDefault} fallback="A" />
-                    <Button
-                      size="3"
-                      color="gray"
-                      variant="outline"
-                      highContrast
-                      onClick={handleButtonClick}
-                      className="!cursor-pointer"
-                    >
-                      Select Image
-                    </Button>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      ref={fileInputRef}
-                      className="hidden"
-                    />
-                  </Flex>
-                </Flex>
-
-                <Flex gap="3" className="my-6" justify="end">
-                  <Dialog.Close>
-                    <Button
-                      variant="soft"
-                      color="gray"
-                      size="3"
-                      className="!cursor-pointer"
-                    >
-                      Cancel
-                    </Button>
-                  </Dialog.Close>
-                  <Dialog.Close>
-                    <Button
-                      color="gray"
-                      variant="solid"
-                      highContrast
-                      size="3"
-                      className="!cursor-pointer"
-                    >
-                      Add User
-                    </Button>
-                  </Dialog.Close>
-                </Flex>
-              </Dialog.Content>
-            </Dialog.Root>
+            <CreateUserForm
+              users={users}
+              setUsers={setUsers}
+              usersClone={usersClone}
+              setUsersClone={setUsersClone}
+            />
           </Flex>
         </Flex>
         <Flex gap="4" className="mt-6 px-4">
@@ -613,270 +483,196 @@ function Home() {
                   </Box>
                 </Flex>
               </Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell>Action</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell className="text-center">
+                Action
+              </Table.ColumnHeaderCell>
             </Table.Row>
           </Table.Header>
 
           <Table.Body>
             {listUserNew.map((user) => (
-              <Table.Row key={user.id}>
-                <Table.Cell>{user.id}</Table.Cell>
-                <Table.Cell>{user.email}</Table.Cell>
-                <Table.Cell>{user.phoneNumber}</Table.Cell>
-                <Table.Cell>{user.firstName}</Table.Cell>
-                <Table.Cell>{user.lastName}</Table.Cell>
-                <Table.Cell>{user.role}</Table.Cell>
+              <Table.Row key={user._id}>
+                <Tooltip content={user._id}>
+                  <Table.Cell className="whitespace-nowrap overflow-hidden overflow-ellipsis max-w-[2em]">
+                    <Skeleton loading={isLoading}>{user._id}</Skeleton>
+                  </Table.Cell>
+                </Tooltip>
                 <Table.Cell>
-                  <Flex gap="4">
-                    <Dialog.Root>
-                      <Dialog.Trigger>
-                        <IconButton
-                          color="amber"
-                          variant="soft"
-                          className="!cursor-pointer"
-                        >
-                          <Pencil2Icon width="18" height="18" />
-                        </IconButton>
-                      </Dialog.Trigger>
-
-                      <Dialog.Content maxWidth="1024px">
-                        <Dialog.Title>Edit User</Dialog.Title>
-
-                        <Flex
-                          gap="3"
-                          className="flex-col sm:flex-row items-center"
-                        >
-                          <Box className="sm:w-8/12 w-full">
-                            <Flex gap="3" className="mt-4">
-                              <Box className="w-8/12">
-                                <label>
-                                  <Text as="span" size="2" mb="1" weight="bold">
-                                    Email{" "}
-                                    <Text className="text-red-600">*</Text>
-                                  </Text>
-                                  <TextField.Root
-                                    size="3"
-                                    defaultValue=""
-                                    placeholder="Enter your email"
-                                  />
-                                </label>
-                              </Box>
-                              <Box className="w-4/12">
-                                <Text as="span" size="2" mb="1" weight="bold">
-                                  Role
-                                </Text>
-                                <DropdownMenu.Root>
-                                  <DropdownMenu.Trigger>
-                                    <Button
-                                      size="3"
-                                      variant="soft"
-                                      color="gray"
-                                      className="!w-full !justify-between !cursor-pointer"
-                                    >
-                                      Select
-                                      <DropdownMenu.TriggerIcon />
-                                    </Button>
-                                  </DropdownMenu.Trigger>
-                                  <DropdownMenu.Content
-                                    variant="soft"
-                                    color="indigo"
-                                  >
-                                    <DropdownMenu.Item>Admin</DropdownMenu.Item>
-                                    <DropdownMenu.Item>User</DropdownMenu.Item>
-                                    <DropdownMenu.Item>
-                                      Editor
-                                    </DropdownMenu.Item>
-                                  </DropdownMenu.Content>
-                                </DropdownMenu.Root>
-                              </Box>
-                            </Flex>
-                            <Box className="mt-4">
-                              <label>
-                                <Text as="span" size="2" mb="1" weight="bold">
-                                  Phone number{" "}
-                                  <Text className="text-red-600">*</Text>
-                                </Text>
-                                <TextField.Root
-                                  size="3"
-                                  type="number"
-                                  defaultValue=""
-                                  placeholder="Enter your phone number"
-                                />
-                              </label>
-                            </Box>
-                            <Flex gap="3" className="mt-4">
-                              <Box className="w-6/12">
-                                <label>
-                                  <Text as="span" size="2" mb="1" weight="bold">
-                                    First Name{" "}
-                                    <Text className="text-red-600">*</Text>
-                                  </Text>
-                                  <TextField.Root
-                                    size="3"
-                                    defaultValue=""
-                                    placeholder="Enter your first name"
-                                  />
-                                </label>
-                              </Box>
-                              <Box className="w-6/12">
-                                <label>
-                                  <Text as="span" size="2" mb="1" weight="bold">
-                                    Last Name{" "}
-                                    <Text className="text-red-600">*</Text>
-                                  </Text>
-                                  <TextField.Root
-                                    size="3"
-                                    defaultValue=""
-                                    placeholder="Enter your last name"
-                                  />
-                                </label>
-                              </Box>
-                            </Flex>
-                            <Box className="mt-4">
-                              <label>
-                                <Text as="span" size="2" mb="1">
-                                  Password{" "}
-                                  <Text className="text-red-600">*</Text>
-                                </Text>
-                                <TextField.Root
-                                  size="3"
-                                  variant="classic"
-                                  type="password"
-                                  defaultValue=""
-                                  placeholder="Enter your password"
-                                >
-                                  <TextField.Slot side="left" color="violet">
-                                    <LockClosedIcon height="16" width="16" />
-                                  </TextField.Slot>
-                                  <TextField.Slot side="right">
-                                    <EyeOpenIcon height="16" width="16" />
-                                  </TextField.Slot>
-                                </TextField.Root>
-                                <TextField.Root
-                                  size="3"
-                                  className="mt-4"
-                                  variant="classic"
-                                  type="password"
-                                  defaultValue=""
-                                  placeholder="Enter your confirm password"
-                                >
-                                  <TextField.Slot side="left" color="violet">
-                                    <LockClosedIcon height="16" width="16" />
-                                  </TextField.Slot>
-                                  <TextField.Slot side="right">
-                                    <EyeClosedIcon height="16" width="16" />
-                                  </TextField.Slot>
-                                </TextField.Root>
-                              </label>
-                            </Box>
-                          </Box>
-                          <Separator
-                            orientation="vertical"
-                            className="!h-auto sm:block hidden"
-                          />
-                          <Flex
-                            direction="column"
-                            className="w-4/12 items-center"
-                            gap="4"
+                  <Skeleton loading={isLoading}>{user.email}</Skeleton>
+                </Table.Cell>
+                <Table.Cell>
+                  <Skeleton loading={isLoading}>{user.phoneNumber}</Skeleton>
+                </Table.Cell>
+                <Table.Cell>
+                  <Skeleton loading={isLoading}>{user.firstName}</Skeleton>
+                </Table.Cell>
+                <Table.Cell>
+                  <Skeleton loading={isLoading}>{user.lastName}</Skeleton>
+                </Table.Cell>
+                <Table.Cell>
+                  <Skeleton loading={isLoading}>{user.role}</Skeleton>
+                </Table.Cell>
+                <Table.Cell>
+                  <Skeleton loading={isLoading}>
+                    <Flex gap="4" className="!justify-center">
+                      <Dialog.Root>
+                        <Dialog.Trigger>
+                          <IconButton
+                            color="indigo"
+                            variant="soft"
+                            className="!cursor-pointer"
                           >
-                            <Text as="span" size="2" mb="1" weight="bold">
-                              Profile Picture
-                            </Text>
-                            <Avatar size="8" src={picDefault} fallback="A" />
-                            <Button
-                              size="3"
-                              color="gray"
-                              variant="outline"
-                              highContrast
-                              onClick={handleButtonClick}
-                              className="!w-max !cursor-pointer"
-                            >
-                              Select Image
-                            </Button>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              ref={fileInputRef}
-                              className="hidden"
-                            />
+                            <EyeOpenIcon width="18" height="18" />
+                          </IconButton>
+                        </Dialog.Trigger>
+
+                        <Dialog.Content>
+                          <Dialog.Title className="text-center">
+                            Infomation User
+                          </Dialog.Title>
+                          <Flex gap="2" className="my-4 !flex-col sm:!flex-row">
+                            <Box className="sm:w-4/12 w-full !flex !justify-center sm:items-center">
+                              <Link
+                                href={user.image ? user.image : "#"}
+                                target={user.image ? "_blank" : ""}
+                              >
+                                <Avatar
+                                  size="8"
+                                  src={user.image ? user.image : picDefault}
+                                  fallback="A"
+                                />
+                              </Link>
+                            </Box>
+                            <DataList.Root className="sm:w-8/12 w-full mt-2">
+                              <DataList.Item>
+                                <DataList.Label minWidth="88px">
+                                  ID
+                                </DataList.Label>
+                                <DataList.Value>
+                                  <Flex align="center" gap="2">
+                                    <Code variant="ghost">{user._id}</Code>
+                                    <IconButton
+                                      size="1"
+                                      aria-label="Copy value"
+                                      color="gray"
+                                      variant="ghost"
+                                    >
+                                      <CopyIcon />
+                                    </IconButton>
+                                  </Flex>
+                                </DataList.Value>
+                              </DataList.Item>
+                              <DataList.Item>
+                                <DataList.Label minWidth="88px">
+                                  Phone Number
+                                </DataList.Label>
+                                <DataList.Value>
+                                  {user.phoneNumber}
+                                </DataList.Value>
+                              </DataList.Item>
+                              <DataList.Item>
+                                <DataList.Label minWidth="88px">
+                                  Email
+                                </DataList.Label>
+                                <DataList.Value>
+                                  <Link href={`mailto:${user.email}`}>
+                                    {user.email}
+                                  </Link>
+                                </DataList.Value>
+                              </DataList.Item>
+                              <DataList.Item>
+                                <DataList.Label minWidth="88px">
+                                  First Name
+                                </DataList.Label>
+                                <DataList.Value>
+                                  {user.firstName}
+                                </DataList.Value>
+                              </DataList.Item>
+                              <DataList.Item>
+                                <DataList.Label minWidth="88px">
+                                  Last Name
+                                </DataList.Label>
+                                <DataList.Value>{user.lastName}</DataList.Value>
+                              </DataList.Item>
+                              <DataList.Item align="center">
+                                <DataList.Label minWidth="88px">
+                                  Role
+                                </DataList.Label>
+                                <DataList.Value>
+                                  <Badge
+                                    color="jade"
+                                    variant="soft"
+                                    radius="full"
+                                  >
+                                    {user.role}
+                                  </Badge>
+                                </DataList.Value>
+                              </DataList.Item>
+                            </DataList.Root>
                           </Flex>
-                        </Flex>
+                        </Dialog.Content>
+                      </Dialog.Root>
 
-                        <Flex gap="3" className="my-6" justify="start">
-                          <Dialog.Close>
-                            <Button
-                              variant="soft"
-                              color="gray"
-                              size="3"
-                              className="!cursor-pointer"
-                            >
-                              Cancel
-                            </Button>
-                          </Dialog.Close>
-                          <Dialog.Close>
-                            <Button
-                              color="gray"
-                              variant="solid"
-                              highContrast
-                              size="3"
-                              className="!cursor-pointer"
-                            >
-                              Save Edit
-                            </Button>
-                          </Dialog.Close>
-                        </Flex>
-                      </Dialog.Content>
-                    </Dialog.Root>
+                      <UpdateUserForm
+                        user={user}
+                        isRefesh={isRefesh}
+                        setIsRefesh={setIsRefesh}
+                      />
 
-                    <AlertDialog.Root>
-                      <AlertDialog.Trigger>
-                        <IconButton
-                          color="crimson"
-                          variant="soft"
-                          className="!cursor-pointer"
-                        >
-                          <Cross2Icon width="18" height="18" />
-                        </IconButton>
-                      </AlertDialog.Trigger>
-                      <AlertDialog.Content maxWidth="450px">
-                        <AlertDialog.Title>
-                          Delete User {user.firstName}
-                        </AlertDialog.Title>
-                        <AlertDialog.Description size="2">
-                          Are you sure? This application will no longer be
-                          accessible and any existing sessions will be expired.
-                        </AlertDialog.Description>
+                      <AlertDialog.Root>
+                        <AlertDialog.Trigger>
+                          <IconButton
+                            color="crimson"
+                            variant="soft"
+                            className="!cursor-pointer"
+                          >
+                            <Cross2Icon width="18" height="18" />
+                          </IconButton>
+                        </AlertDialog.Trigger>
+                        <AlertDialog.Content maxWidth="450px">
+                          <AlertDialog.Title>
+                            Delete User {user.lastName}
+                          </AlertDialog.Title>
+                          <AlertDialog.Description size="2">
+                            Are you sure? This application will no longer be
+                            accessible and any existing sessions will be
+                            expired.
+                          </AlertDialog.Description>
 
-                        <Flex gap="3" mt="4" justify="end">
-                          <AlertDialog.Cancel>
-                            <Button
-                              variant="soft"
-                              color="gray"
-                              size="3"
-                              className="!cursor-pointer"
-                            >
-                              Cancel
-                            </Button>
-                          </AlertDialog.Cancel>
-                          <AlertDialog.Action>
-                            <Button
-                              variant="solid"
-                              color="red"
-                              size="3"
-                              className="!cursor-pointer"
-                            >
-                              Yes, I agree
-                            </Button>
-                          </AlertDialog.Action>
-                        </Flex>
-                      </AlertDialog.Content>
-                    </AlertDialog.Root>
-                  </Flex>
+                          <Flex gap="3" mt="4" justify="end">
+                            <AlertDialog.Cancel>
+                              <Button
+                                variant="soft"
+                                color="gray"
+                                size="3"
+                                className="!cursor-pointer"
+                              >
+                                Cancel
+                              </Button>
+                            </AlertDialog.Cancel>
+                            <AlertDialog.Action>
+                              <Button
+                                variant="solid"
+                                color="red"
+                                size="3"
+                                className="!cursor-pointer"
+                                onClick={() => handleDeleteUser(user._id)}
+                              >
+                                Yes, I agree
+                              </Button>
+                            </AlertDialog.Action>
+                          </Flex>
+                        </AlertDialog.Content>
+                      </AlertDialog.Root>
+                    </Flex>
+                  </Skeleton>
                 </Table.Cell>
               </Table.Row>
             ))}
           </Table.Body>
         </Table.Root>
+        {isLoading && <Progress color="gray" value={valueProcess} />}
+
         {usersClone.length === 0 && isClickSearch && (
           <Flex className="w-full !justify-center">
             <Callout.Root color="gray" className="mt-2 sm:w-[50%] w-full">
@@ -922,7 +718,8 @@ function Home() {
                 </DropdownMenu.Content>
               </DropdownMenu.Root>
               <Text>
-                {itemStart + 1 + " - "}
+                {usersClone.length > 0 ? itemStart + 1 : itemStart}
+                {" - "}
                 <Text>
                   {itemsEnd > usersClone.length ? usersClone.length : itemsEnd}
                 </Text>
@@ -935,6 +732,7 @@ function Home() {
                 color="gray"
                 variant="soft"
                 onClick={handlePrevMore}
+                disabled={isStart}
                 className="!cursor-pointer"
               >
                 <DoubleArrowLeftIcon width="18" height="18" />
@@ -943,6 +741,7 @@ function Home() {
                 color="gray"
                 variant="soft"
                 onClick={handlePrev}
+                disabled={isStart}
                 className="!cursor-pointer"
               >
                 <ChevronLeftIcon width="18" height="18" />
@@ -951,6 +750,7 @@ function Home() {
                 color="gray"
                 variant="soft"
                 onClick={handleNext}
+                disabled={isEnd}
                 className="!cursor-pointer"
               >
                 <ChevronRightIcon width="18" height="18" />
@@ -959,6 +759,7 @@ function Home() {
                 color="gray"
                 variant="soft"
                 onClick={handleNextMore}
+                disabled={isEnd}
                 className="!cursor-pointer"
               >
                 <DoubleArrowRightIcon width="18" height="18" />

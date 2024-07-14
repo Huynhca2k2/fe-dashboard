@@ -11,7 +11,6 @@ import {
 } from "@radix-ui/themes";
 import defaultAvatar from "../assets/images/imgUser.png";
 import { BellIcon, HamburgerMenuIcon } from "@radix-ui/react-icons";
-import { useState } from "react";
 
 function Header({ handleToggleMenu, handleToggleMenuMobile }) {
   return (
@@ -29,7 +28,7 @@ function Header({ handleToggleMenu, handleToggleMenuMobile }) {
         <HamburgerMenuIcon className="h-6 w-6 text-white" />
       </Box>
       <Container size="4" className="justify-center">
-        <Flex className="w-full sm:!justify-between !justify-end items-center ">
+        <Flex className="w-full sm:!justify-between !justify-end items-center px-4">
           <Heading as="h4" className="hidden sm:block">
             HRDept Company
           </Heading>
