@@ -51,7 +51,6 @@ const UpdateUserForm = ({ user, isRefesh, setIsRefesh }) => {
   const [userItem, setUserItem] = useState(user);
   const [selectedRole, setSelectedRole] = useState(userItem.role);
   setValue("role", userItem.role);
-  setValue("image", userItem.image);
   setValue("updatedAt", new Date().toISOString());
   const [valueNotChange, setValueNotChange] = useState(false);
 
